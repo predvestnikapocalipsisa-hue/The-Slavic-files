@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Messages index</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #111;
+            color: #eee;
+            padding: 20px;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+        li {
+            margin: 4px 0;
+        }
+        a {
+            color: #6cf;
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Messages (1–150)</h1>
+
+<input type="text" id="search" placeholder="Поиск (например: 42)">
+
+<ul id="list"></ul>
+
+<script>
+const list = document.getElementById("list");
+const search = document.getElementById("search");
+
+const files = [];
+
+// messages.html
+files.push({ name: "messages", file: "messages.html" });
+
+// messages2.html ... messages150.html
+for (let i = 2; i <= 150; i++) {
+    files.push({
+        name: "messages" + i,
+        file: "messages" + i + ".html"
+    });
+}
+
+function render(filter = "") {
+    list.innerHTML = "";
+    files
+        .filter(f => f.name.includes(filter))
+        .forEach(f => {
+            const li = document.createElement("li");
+            li.innerHTML = `<a href="${f.file}">${f.name}</a>`;
+            list.appendChild(li);
+        });
+}
+
+search.addEventListener("input", () => render(search.value));
+render();
+</script>
+
+</body>
+</html>
