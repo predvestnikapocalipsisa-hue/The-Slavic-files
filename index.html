@@ -1,75 +1,91 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <title>Messages index</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #111;
-            color: #eee;
-            padding: 20px;
-        }
-        input {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 15px;
-            font-size: 16px;
-        }
-        ul {
-            list-style: none;
-            padding: 0;
-        }
-        li {
-            margin: 4px 0;
-        }
-        a {
-            color: #6cf;
-            text-decoration: none;
-        }
-        a:hover {
-            text-decoration: underline;
-        }
-    </style>
+<meta charset="UTF-8">
+<title>Messages search</title>
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #111;
+    color: #eee;
+    padding: 20px;
+}
+input {
+    width: 100%;
+    padding: 10px;
+    font-size: 16px;
+    margin-bottom: 15px;
+}
+li {
+    margin: 6px 0;
+}
+a {
+    color: #6cf;
+    text-decoration: none;
+}
+small {
+    color: #aaa;
+}
+</style>
 </head>
 <body>
 
-<h1>Messages (1–150)</h1>
+<h1>Поиск по messages (1–150)</h1>
 
-<input type="text" id="search" placeholder="Поиск (например: 42)">
+<input id="query" placeholder="Введите текст для поиска...">
 
-<ul id="list"></ul>
+<ul id="results"></ul>
 
 <script>
-const list = document.getElementById("list");
-const search = document.getElementById("search");
+const results = document.getElementById("results");
+const queryInput = document.getElementById("query");
 
-const files = [];
-
-// messages.html
-files.push({ name: "messages", file: "messages.html" });
-
-// messages2.html ... messages150.html
+const files = ["messages.html"];
 for (let i = 2; i <= 150; i++) {
-    files.push({
-        name: "messages" + i,
-        file: "messages" + i + ".html"
-    });
+    files.push(`messages${i}.html`);
 }
 
-function render(filter = "") {
-    list.innerHTML = "";
-    files
-        .filter(f => f.name.includes(filter))
-        .forEach(f => {
-            const li = document.createElement("li");
-            li.innerHTML = `<a href="${f.file}">${f.name}</a>`;
-            list.appendChild(li);
-        });
+async function search(text) {
+    results.innerHTML = "Ищу...";
+    const found = [];
+
+    for (const file of files) {
+        try {
+            const res = await fetch(file);
+            const html = await res.text();
+
+            if (html.toLowerCase().includes(text.toLowerCase())) {
+                found.push(file);
+            }
+        } catch (e) {
+            console.warn("Не удалось загрузить", file);
+        }
+    }
+
+    results.innerHTML = "";
+
+    if (found.length === 0) {
+        results.innerHTML = "<li>Ничего не найдено</li>";
+        return;
+    }
+
+    for (const file of found) {
+        const li = document.createElement("li");
+        li.innerHTML = `<a href="${file}">${file}</a> <small>— найдено</small>`;
+        results.appendChild(li);
+    }
 }
 
-search.addEventListener("input", () => render(search.value));
-render();
+let timeout;
+queryInput.addEventListener("input", () => {
+    clearTimeout(timeout);
+    const text = queryInput.value.trim();
+    if (text.length < 2) {
+        results.innerHTML = "";
+        return;
+    }
+    timeout = setTimeout(() => search(text), 400);
+});
 </script>
 
 </body>
